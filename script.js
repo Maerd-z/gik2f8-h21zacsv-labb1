@@ -1,12 +1,12 @@
 'use strict';
 
+var htmlBoxTemplate = `<div style="display: flex" class="w-80 custom-box mb-5 mx-5 bg-white rounded"></div>`
 let bookList = [];
-// API call
+
 window.addEventListener('load', () => {
   getAll().then((apiBooks) => (bookList = apiBooks));
 });
 
-// Result of API call is filtered.
 searchField.addEventListener('keyup', (e) =>
   renderBookList(
     bookList.filter(({ title, author }) => {
@@ -18,20 +18,42 @@ searchField.addEventListener('keyup', (e) =>
     })
   )
 );
-// bookList[index].id
-var htmlBoxTemplate = `<div class="w-80 custom-box mb-5 mx-5 bg-white rounded">Hello</div>`
 
-function DisplayInfo(e){
+function CreateInfoBox(e){
   var node = e.target;
   var parent = e.target.parentNode;
   
-  console.log(parent.childElementCount)
-
   node.insertAdjacentHTML('afterend', htmlBoxTemplate)
-  // Custom box kan nu ändras.
   const box = document.getElementsByClassName('custom-box')
-  //let book = getByBookId(index).id
-  //console.log(e)
+
+  getByBookId(node.value).then((book) => RenderInfoBox(book, box[0]))
+}
+
+// Creates all element and adds them to the DOM.
+function RenderInfoBox(book, box){
+  box.style = "flex-flow: row wrap; border: 2px black; border-style: outset;"
+
+  const img = document.createElement('img')
+  img.src=`${book.coverImage}`;
+  img.style = "display:block;"
+
+  const head = document.createElement('h2')
+  head.innerText = `Title: ${book.title} (${book.releaseDate})`
+  head.style = "display:block;"
+
+  const author = document.createElement('h2')
+  author.innerText = `Author: ${book.author}`
+  author.style = "display:block"
+
+  const pages = document.createElement('p')
+  pages.innerText = `Pages: This book is ${book.pages} pages long.`
+  pages.style = "display:block;"
+
+
+  box.appendChild(head)
+  box.appendChild(pages)
+  box.appendChild(author)
+  box.appendChild(img)
 }
 
 function RemoveDisplay(e){
@@ -39,7 +61,7 @@ function RemoveDisplay(e){
   var nextSibling = node.nextElementSibling;
   node.parentNode.removeChild(nextSibling);
 }
-// The filtered booklist is sent to BookList. BookList returns html for a list of books.
+
 function renderBookList(bookList) {
   const existingElement = document.querySelector('.book-list');
   const bookList_item = document.getElementsByClassName('book-list__item');
@@ -50,9 +72,8 @@ function renderBookList(bookList) {
   bookList.length > 0 && searchField.value && root.insertAdjacentHTML('beforeend', BookList(bookList));
   
   // Adds event listeners.
-  // mouseover to get ID then call DisplayInfo?
   for (let i=0; i < bookList_item.length; i++){
-    bookList_item[i].addEventListener('mouseover', DisplayInfo)
+    bookList_item[i].addEventListener('mouseover', CreateInfoBox)
     bookList_item[i].addEventListener('mouseout', RemoveDisplay)
   }
 }
